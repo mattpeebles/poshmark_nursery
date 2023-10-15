@@ -1,13 +1,16 @@
+import os
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
-from selenium.common.exceptions import StaleElementReferenceException, TimeoutException
+from selenium.common.exceptions import TimeoutException
 from datetime import datetime, timedelta
 import sys, random, pdb, time
-import config
+from dotenv import load_dotenv
+
+load_dotenv()
    
 class Posh_Nursery:
    def __init__(self, username, password, slowMode = False, debug = False, checkCaptcha = True, toShareClosetsFromFile = False, timeToWait = 3600, maintainOrder = False, shareBack = False):
@@ -249,7 +252,7 @@ class Posh_Nursery:
             print(str(count) + ": "  + itemNameTxt)
 
    def getItemNames(self, shareAFew = False):
-      self.itemNameElements = self.driver.find_elements_by_xpath(self.itemNameXPath)
+      self.itemNameElements = self.driver.find_elements(By.XPATH,self.itemNameXPath)
       if shareAFew:
          closetSize = len(self.itemNameElements)
          if closetSize > self.numItemsToShareFromOtherClosets:
@@ -258,7 +261,7 @@ class Posh_Nursery:
       self.getAndPrintItemNames()
 
    def getShareButtons(self, shareAFew = False):      
-      self.shareButtons = self.driver.find_elements_by_xpath(self.firstShareXPath)      
+      self.shareButtons = self.driver.find_elements(By.XPATH,self.firstShareXPath)      
       self.closetSize = len(self.shareButtons)
       if shareAFew and self.closetSize > self.numItemsToShareFromOtherClosets:
          for i in range(0, self.closetSize - self.numItemsToShareFromOtherClosets):
@@ -473,7 +476,7 @@ class Posh_Nursery:
       self.driver.get(self.shareNewsUrl)
       self.scrollPageANumTimes()
       self.waitForAnElementByXPath(self.closetNameXPath, "closetNameXPath")
-      closetNames = self.driver.find_elements_by_xpath(self.closetNameXPath)
+      closetNames = self.driver.find_elements(By.XPATH,self.closetNameXPath)
       closetNamesSet = set()
       for n in closetNames:
          closetNamesSet.add(n.text)
@@ -559,8 +562,8 @@ if __name__ == "__main__":
       print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
       sys.exit()
    
-   username = config.username
-   password = config.password
+   username = os.getenv("POSH_USERNAME")
+   password = os.getenv("POSH_PASSWORD")
    posh_nursery = Posh_Nursery(username, password, slowMode, debug, checkCaptcha, toShareClosetsFromFile, timeToWait, maintainOrderBasedOnOrderFile, shareBack)
    print("Logging in Poshmark as " + username + "...")
    posh_nursery.login()
