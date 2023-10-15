@@ -1,4 +1,6 @@
-# .gitignore
+#.gitignore
 
-.env
 env/
+.env
+.vscode/
+__pycache__/
