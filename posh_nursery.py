@@ -1,4 +1,4 @@
-import os
+import sys, random, pdb, time, os, argparse
 from selenium import webdriver
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.support.ui import WebDriverWait
@@ -7,8 +7,9 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.common.by import By
 from selenium.common.exceptions import TimeoutException
 from datetime import datetime, timedelta
-import sys, random, pdb, time
 from dotenv import load_dotenv
+
+from spinner import Spinner
 
 load_dotenv()
    
@@ -141,6 +142,8 @@ class Posh_Nursery:
       passwordElement.submit()
              
    def login(self): 
+      spinner = Spinner(f"Logging in Poshmark as {self.username}...")
+      spinner.start()
       self.driver.get(self.loginUrl)      
       self.enterUserName()
       self.enterAndSubmitPassword()
@@ -154,7 +157,7 @@ class Posh_Nursery:
          self.driver.switch_to.window(self.driver.current_window_handle) 
          pdb.set_trace()
          self.driver.minimize_window()
-      print("Logged into poshmark")
+      spinner.stop("Logged into poshmark")
 
    def getClosetAvailableUrl(self, username):   
       availableUrl = "{}/{}{}".format(self.closetUrl, username, "?availability=available")
@@ -362,11 +365,14 @@ class Posh_Nursery:
          time.sleep(self.getRandomSec())
    
    def shareCloset(self, orderList, shareButtonsList):
-      for itemName, shareButton in zip(reversed(orderList), reversed(shareButtonsList)):
+      closet_size = len(orderList)
+      self.update_loading_bar(0, closet_size)
+      for idx, (itemName, shareButton) in enumerate(zip(reversed(orderList), reversed(shareButtonsList))):
          if self.debug:
             print("   Sharing " + itemName)
          self.clickFirstShareButton(shareButton) 
          self.clickSecondShareButton(shareButton)
+         self.update_loading_bar(idx + 1, closet_size)
    
    def shareAllItems(self, sharingMine = True): # default is sharing all items from own closet
       self.driver.minimize_window()
@@ -435,7 +441,7 @@ class Posh_Nursery:
 
             if self.shareBack:
                self.shareBackAndFollowOtherClosets()
-            print("Shared closet, will share again in " + str(timeToWait/60) + " mins at " + str(datetime.now() + timedelta(seconds=timeToWait))) 
+            print("Shared closet, will share again in " + str(self.timeToWait/60) + " mins at " + str(datetime.now() + timedelta(seconds=self.timeToWait))) 
             time.sleep(self.timeToWait)
    
    def shareAnotherCloset(self, closetName, sharingAFew = False): #default is sharing all items from another closet
@@ -507,8 +513,17 @@ class Posh_Nursery:
          for closet in self.closetsToShare:
             print("Sharing " + closet)
             closetAvailableUrl = self.getClosetAvailableUrl(closet)
-            self.shareAnotherCloset(closet) 
+            self.shareAnotherCloset(closetAvailableUrl) 
  
+
+   def update_loading_bar(self, current_iteration, iterations):
+      progress = current_iteration / iterations
+      bar_length = 40
+      bar = "[" + "=" * int(bar_length * progress) + " " * (bar_length - int(bar_length * progress)) + "]"
+      status = f"{current_iteration} out of {iterations} items"
+      sys.stdout.write(f"\r{bar} {int(progress * 100)}% {status}")
+      sys.stdout.flush()
+        
 def checkBooleanInput(val):
    if val in ('y', 'yes', 't', 'true', '1'):
       return True, True
@@ -517,55 +532,69 @@ def checkBooleanInput(val):
    else:
       return False, False
 
+def main():
+      parser = argparse.ArgumentParser(description="Poshmark Nursery")
+
+      parser.add_argument(
+         "--slow-mode",
+         action="store_true",
+         help="Enable slow mode (optional).",
+         default=False
+      )
+      parser.add_argument(
+         "--debug",
+         action="store_true",
+         help="Enable debug mode (optional).",
+         default=False
+      )
+      parser.add_argument(
+         "--check-captcha",
+         action="store_true",
+         help="Check for captcha (optional).",
+         default=True
+      )
+      parser.add_argument(
+         "--share-closets-from-file",
+         action="store_true",
+         help="Share closets from closetsToShare.txt (optional).",
+         default=False
+      )
+      parser.add_argument(
+         "--wait-time",
+         type=int,
+         default=3600,
+         help="Number of seconds to wait after one round of sharing. Default is 3600.",
+      )
+      parser.add_argument(
+         "--maintain-order",
+         action="store_true",
+         help="Maintain closet order based on an order file (optional).",
+         default=False
+      )
+      parser.add_argument(
+         "--share-back",
+         action="store_true",
+         help="Share back (optional).",
+         default=False
+      )
+
+      args = parser.parse_args()
+      username = os.getenv("POSH_USERNAME")
+      password = os.getenv("POSH_PASSWORD")    
+      posh_nursery = Posh_Nursery(
+         username,
+         password,
+         args.slow_mode,
+         args.debug,
+         args.check_captcha,
+         args.share_closets_from_file,
+         args.wait_time,
+         args.maintain_order,
+         args.share_back
+      )
+      posh_nursery.login()
+      posh_nursery.share()
+      posh_nursery.quit()
+
 if __name__ == "__main__":
-   totNumArgs = len(sys.argv)
-   timeToWait = 3600 # default wait time is 1 hr
-   debug = False
-   slowMode = False
-   maintainOrderBasedOnOrderFile = False
-   checkCaptcha = True
-   toShareClosetsFromFile = False
-   shareBack = False
-   if totNumArgs >= 2:
-      goodFormat, checkCaptcha = checkBooleanInput(sys.argv[1].lower())
-      if not goodFormat:
-         print("1st parameter " + sys.argv[1] + " needs to be a boolean value Y|N for whether or not to check for captcha")
-         print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
-         sys.exit()
-   if totNumArgs >= 3:
-      goodFormat, toShareClosetsFromFile = checkBooleanInput(sys.argv[2].lower())
-      if not goodFormat:
-         print("2nd parameter " + sys.argv[2] + " needs to be a boolean value Y|N for whether or not to share closets in closetsToShare.txt")
-         print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
-         sys.exit()
-   if totNumArgs >= 4:
-      try:
-         timeToWait = int(sys.argv[3])
-      except ValueError as e:
-         print("3rd parameter " + sys.argv[3] +" needs to be an integer number for the number of seconds to wait after one round of sharing")
-         print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
-         sys.exit()
-   if totNumArgs >= 5:
-      goodFormat, maintainOrderBasedOnOrderFile = checkBooleanInput(sys.argv[4].lower())
-      if not goodFormat:
-         print("4th parameter " + sys.argv[4] + " needs to be a boolean value Y|N for whether or not to maintain closet order based on order file")
-         print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
-         sys.exit()
-   if totNumArgs >= 6:
-      goodFormat, shareBack = checkBooleanInput(sys.argv[5].lower())
-      if not goodFormat:
-         print("5th parameter " + sys.argv[5] + " needs to be a boolean value Y|N for whether or not to share back")
-         print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
-         sys.exit()   
-   if totNumArgs >= 7:
-      print("Too many parameters. This program only takes 5 optional parameters")
-      print("Usage: python posh_nursery.py {Y|N} {Y|N} {integerNumberOfSeconds} {Y|N} {Y|N}")
-      sys.exit()
-   
-   username = os.getenv("POSH_USERNAME")
-   password = os.getenv("POSH_PASSWORD")
-   posh_nursery = Posh_Nursery(username, password, slowMode, debug, checkCaptcha, toShareClosetsFromFile, timeToWait, maintainOrderBasedOnOrderFile, shareBack)
-   print("Logging in Poshmark as " + username + "...")
-   posh_nursery.login()
-   posh_nursery.share()
-   posh_nursery.quit()   
+    main()
