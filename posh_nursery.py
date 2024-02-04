@@ -1,4 +1,4 @@
-import os, argparse
+import argparse
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 from src import nursery

@@ -10,6 +10,7 @@ from selenium.webdriver.common.by import By
 
 class Browser:
     _current_page: str | None
+    
     def __init__(self):
         self.chrome_options = Options()
         # self.chrome_options.add_argument("--headless")
@@ -18,8 +19,9 @@ class Browser:
         self.time_out_secs = 10
         self.scroll_wait_time = 5
         self.num_times_to_scroll = 5
+        self._current_page = None
 
-    def already_on_page(self, page: str)->bool:
+    def is_already_on_page(self, page: str)->bool:
         return page == self._current_page
 
     def set_current_page(self, page: str):
@@ -30,7 +32,7 @@ class Browser:
 
     def get(self, url: str):
         """points browser to the url """
-        self.browser.get(url)
+        self.driver.get(url)
 
     def minimize_window(self):
         self.driver.minimize_window()
@@ -119,9 +121,9 @@ class Browser:
             print("clicking button failed: " + str(e))
 
     def wait_till_modal_appears(self, xpath):
-        modalPopsUp = False
-        while not modalPopsUp:
-            modalPopsUp = self.wait_for_an_element_by_xpath(xpath, "modal")
+        modal_pops_up = False
+        while not modal_pops_up:
+            modal_pops_up = self.wait_for_an_element_by_xpath(xpath, "modal")
 
     def scroll_page(self):
         """will scroll the current page self.num_times_to_scroll times"""

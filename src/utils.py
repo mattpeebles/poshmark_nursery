@@ -1,15 +1,15 @@
 import os
 import random
-
+import sys
 
 def get_random_sec():
     return random.randrange(1, 5, 1)
 
 def set_debug(debug: bool):
-    os.environ['DEBUG'] = debug
+    os.environ['DEBUG'] = str(debug)
     
 def is_debug()->bool:
-    return os.environ.get('DEBUG')
+    return os.environ.get('DEBUG', "false").lower() == "true"
 
 # todo: move to own class
 def update_loading_bar(self, current_iteration, iterations):

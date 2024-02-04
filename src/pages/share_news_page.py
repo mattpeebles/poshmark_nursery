@@ -1,11 +1,9 @@
-
-
 from src.pages.poshmark_page import PoshmarkPage
-
 
 class ShareNews(PoshmarkPage):
     CLOSET_NAME = "//p[@class='wb--ww tc--g']//a"  # used for sharing back
     
+    @property
     def _path(self):
         return "news/share"
     

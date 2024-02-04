@@ -1,5 +1,4 @@
-from closet_page import ClosetBase
-
+from src.pages.closet_page_base import ClosetBase
 
 class Closet(ClosetBase):
     FOLLOW_BUTTON = "//button[@class='al--right btn follow__btn m--l--2 m--r--1 btn--primary']"  # used to follow

@@ -1,6 +1,6 @@
 import time
 from datetime import datetime, timedelta
-from poshmark import Poshmark
+from src.poshmark import Poshmark
 from src.constants import ONE_HOUR_IN_SECONDS
 
 
@@ -9,7 +9,6 @@ class Posh_Nursery:
     def __init__(
         self,
         slow_mode=False,
-        debug=False,
         share_closets_from_file=False,
         time_to_wait_seconds=ONE_HOUR_IN_SECONDS,
         maintain_order=False,
@@ -17,9 +16,8 @@ class Posh_Nursery:
     ):
         self.timeToWait = time_to_wait_seconds
         self.poshmark = Poshmark(
-            slow_mode, debug, share_closets_from_file, maintain_order, share_back
+            slow_mode, share_closets_from_file, maintain_order, share_back
         )
-        self.driver.minimize_window()
 
     def quit(self):
         self.poshmark.quit()

@@ -1,14 +1,14 @@
-from abc import ABCMeta, abstractmethod, abstractproperty
+from abc import ABC, abstractmethod, abstractproperty
 import datetime
 import pdb
 import time
-from poshmark_page import PoshmarkPage
+from src.pages.poshmark_page import PoshmarkPage
 from src.browser import Browser
-from utils import get_random_sec, is_debug, update_loading_bar
+from src.utils import get_random_sec, is_debug, update_loading_bar
 from selenium.common.exceptions import TimeoutException
 from selenium.webdriver.remote.webelement import WebElement
 
-class ClosetBase(PoshmarkPage, ABCMeta):
+class ClosetBase(PoshmarkPage, ABC):
     FIRST_SHARE = "//i[@class='icon share-gray-large']"
     SECOND_SHARE = "//i[@class='icon pm-logo-white']"
     SHARE_MODAL_TITLE = "//h5[@class='modal__title']"
@@ -35,7 +35,8 @@ class ClosetBase(PoshmarkPage, ABCMeta):
         self.closet_order_dict = {}
         self.num_items_to_share_from_other_closets = 8
     
-    def _get_path(self)->str:
+    @property
+    def _path(self)->str:
         return f"closet/{self.closet_name}?availability=available"
     
     @abstractproperty

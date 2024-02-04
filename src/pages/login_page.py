@@ -1,5 +1,6 @@
 import os
-from poshmark_page import PoshmarkPage
+from src.browser import Browser
+from src.pages.poshmark_page import PoshmarkPage
 import sys
 import pdb
 
@@ -7,10 +8,13 @@ from src.utils import is_debug
 
 class LoginPage(PoshmarkPage):
     username: str
-    def __init__(self):
+    
+    def __init__(self, browser: Browser):
+        super().__init__(browser)
         self.username = os.getenv("POSH_USERNAME")
     
-    def _path():
+    @property
+    def _path(self):
         return "login"
     
     LOGIN = "//input[@name='userHandle']"

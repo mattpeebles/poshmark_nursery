@@ -1,9 +1,8 @@
-from abc import ABCMeta, abstractproperty
-from browser import Browser
+from abc import ABC, abstractproperty
+from src.browser import Browser
 
-class PoshmarkPage(ABCMeta):
+class PoshmarkPage(ABC):
     _base_url = "https://poshmark.com"
-    share_news = f"{_base_url}/news/share"
     
     def __init__(self, browser: Browser):
         self.browser = browser
@@ -18,7 +17,7 @@ class PoshmarkPage(ABCMeta):
     
     def go(self):
         page = self.__class__.__name__
-        if not self.browser.already_on_page(page):
+        if not self.browser.is_already_on_page(page):
             self.browser.get(self._page_url)
             self.browser.set_current_page(page)
         

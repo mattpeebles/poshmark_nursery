@@ -1,10 +1,6 @@
-from browser import Browser
-import sys
+from src.browser import Browser
 from spinner import Spinner
-from pages import LoginPage
-from src.pages.my_closet_page import MyCloset
-from src.pages.share_news_page import ShareNews
-from src.pages.user_closet_page import Closet
+from src.pages import LoginPage, MyCloset, ShareNews, Closet
 
 class Poshmark:
     def __init__(
@@ -34,7 +30,7 @@ class Poshmark:
         if self.share_closets_from_file:
             self.share_closets_from_file()
         else:
-            my_closet = MyCloset(self.browser, self.username)
+            my_closet = MyCloset(self.browser)
             if self.maintain_order:
                 my_closet.share_in_text_file_order("order.txt", self.slow_mode)
             else:

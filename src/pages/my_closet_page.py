@@ -1,6 +1,6 @@
 import os
 import sys
-from closet_page import ClosetBase
+from src.pages.closet_page_base import ClosetBase
 from src.browser import Browser
 from src.pages.my_stats_page import MyStats
 from src.utils import is_debug
@@ -68,7 +68,7 @@ class MyCloset(ClosetBase):
         self._share_impl(order_text_file, slowly)
     
     def share(self, slowly: bool):
-        self._share_impl(slowly)
+        self._share_impl(None, slowly=slowly)
         """shares in closet order"""
 
     def read_in_closet_order(self):
