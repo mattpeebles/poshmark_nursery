@@ -2,6 +2,8 @@ import os, argparse
 from selenium.webdriver.support import expected_conditions as EC
 from dotenv import load_dotenv
 from src import nursery
+from src.constants import ONE_HOUR_IN_SECONDS
+from src.utils import set_debug
 
 load_dotenv()
 
@@ -29,12 +31,6 @@ def main():
          default=False
       )
       parser.add_argument(
-         "--check-captcha",
-         action="store_true",
-         help="Check for captcha (optional).",
-         default=True
-      )
-      parser.add_argument(
          "--share-closets-from-file",
          action="store_true",
          help="Share closets from closetsToShare.txt (optional).",
@@ -43,7 +39,7 @@ def main():
       parser.add_argument(
          "--wait-time",
          type=int,
-         default=3600,
+         default=ONE_HOUR_IN_SECONDS,
          help="Number of seconds to wait after one round of sharing. Default is 3600.",
       )
       parser.add_argument(
@@ -60,18 +56,14 @@ def main():
       )
 
       args = parser.parse_args()
-      username = os.getenv("POSH_USERNAME")
-      password = os.getenv("POSH_PASSWORD")    
+      set_debug(args.debug)
+
       posh_nursery = nursery.Posh_Nursery(
-         username,
-         password,
-         args.slow_mode,
-         args.debug,
-         args.check_captcha,
-         args.share_closets_from_file,
-         args.wait_time,
-         args.maintain_order,
-         args.share_back
+         slow_mode=args.slow_mode,
+         share_closets_from_file=args.share_closets_from_file,
+         time_to_wait_seconds=args.wait_time,
+         maintain_order=args.maintain_order,
+         share_back=args.share_back
       )
       posh_nursery.login()
       posh_nursery.share()

@@ -1,38 +1,38 @@
-import random, time
+import time
 from datetime import datetime, timedelta
 from poshmark import Poshmark
+from src.constants import ONE_HOUR_IN_SECONDS
+
 
 
 class Posh_Nursery:
-    def __init__(self, username, password, slowMode = False, debug = False, checkCaptcha = True, toShareClosetsFromFile = False, timeToWait = 3600, maintainOrder = False, shareBack = False):
-        self.timeToWait = timeToWait
-        self.poshmark = Poshmark(username, password, slowMode, debug, checkCaptcha, toShareClosetsFromFile, maintainOrder, shareBack)
+    def __init__(
+        self,
+        slow_mode=False,
+        debug=False,
+        share_closets_from_file=False,
+        time_to_wait_seconds=ONE_HOUR_IN_SECONDS,
+        maintain_order=False,
+        share_back=False,
+    ):
+        self.timeToWait = time_to_wait_seconds
+        self.poshmark = Poshmark(
+            slow_mode, debug, share_closets_from_file, maintain_order, share_back
+        )
         self.driver.minimize_window()
-   
 
-    def quit(self):   
-      self.poshmark.quit()
-   
-    def getRandomSec(self):
-      return random.randrange(1, 5, 1)
+    def quit(self):
+        self.poshmark.quit()
 
     def share(self):
         self.poshmark.share()
-        print("Shared closet, will share again in " + str(self.timeToWait/60) + " mins at " + str(datetime.now() + timedelta(seconds=self.timeToWait))) 
+        print(
+            "Shared closet, will share again in "
+            + str(self.timeToWait / 60)
+            + " mins at "
+            + str(datetime.now() + timedelta(seconds=self.timeToWait))
+        )
         time.sleep(self.timeToWait)
-        
+
     def login(self):
         self.poshmark.login()
-        
-
-
-
-
-
-   
-
-
-   
-
-
-   
